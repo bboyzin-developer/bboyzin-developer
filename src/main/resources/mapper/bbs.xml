@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="BbsDAO">
+
+    <!-- 게시물 리스트 -->
+    <select id="getBbsList" resultType="bbs">
+        <![CDATA[
+        select *,count(*) over() as cnt_total
+        from ppomppu
+        where date >=#{StartDate} and date<=#{EndDate}
+        ]]>
+        <if test="searchCondition == 'TITLE'">
+            and l_title like '%'||#{searchKeyword}||'%'
+        </if>
+        <if test="searchCondition == 'KEYWORD'">
+            and category like '%'||#{searchKeyword}||'%'
+        </if>
+        <if test="searchCondition == 'CONTENT'">
+            and maincontent like '%'||#{searchKeyword}||'%'
+        </if>
+        limit #{perPageNum} offset #{pageStart}
+    </select>
+
+    <!-- 일자별 게시물 숫자 -->
+    <select id="getBbsCount" resultType="bbs">
+	<![CDATA[
+        select count(date) as cnt,
+            date
+        from ppomppu
+        where date >=#{StartDate} and date<=#{EndDate}
+        group by date
+        order by date
+                asc
+        ]]>
+	</select>
+
+    <!-- 질문 유형 분석 -->
+    <select id="getBbsQna" resultType="bbs">
+	<![CDATA[
+        select t.c_category,
+               t.cnt_total,
+               round((t.cnt_total/sum(cnt_total)over())*100,2) as round_category
+        from(select c_category, count(*) as cnt_total
+             from category
+             where c_date>=#{StartDate} and c_date<=#{EndDate}
+             group by c_category
+             order by cnt_total desc
+                 limit 10
+            )t
+        ]]>
+	</select>
+
+    <!--키워드분석-->
+    <select id="getBbsKey" resultType="bbs">
+	<![CDATA[
+        select tt.c_category,
+               tt.cnt_total,
+               tt.round_category,
+               tt.avg_this,
+               coalesce (tt.avg_last,1) as avg_last,
+               round(((tt.avg_this::numeric/COALESCE(tt.avg_last,1)::numeric)*100)-100,2) as round_last
+        from(
+                select
+                    t.c_category,
+                    t.cnt_total,
+                    round((t.cnt_total/sum(cnt_total)over())*100,2) as round_category,
+                    (t.cnt_total/cnt_date) as avg_this,
+                    ((select count(c_category) from category
+                      where c_date>=to_char(#{StartDate}::date - interval '1 year','yyyy-MM-dd')
+                        and c_date<=to_char(#{EndDate}::date - interval '1 year','yyyy-MM-dd')
+                        and c_category=t.c_category)/nullif((select count(distinct c_date) from category
+                                                             where c_date>=to_char(#{StartDate}::date - interval '1 year','yyyy-MM-dd')
+                                                               and c_date<=to_char(#{EndDate}::date - interval '1 year','yyyy-MM-dd')
+                                                               and c_category=t.c_category),0)) as avg_last
+                from(select count(distinct c_date) as cnt_date, c_category, count(*) as cnt_total
+                     from category
+                     where c_date>=#{StartDate} and c_date<=#{EndDate}
+                     group by c_category
+                     order by cnt_total desc
+                         limit 10
+                    )t)tt
+        ]]>
+	</select>
+
+    <!--올해 일자별 키워드 수,평균 키워드분석-->
+    <select id="getKeyThisYear" resultType="bbs">
+	<![CDATA[
+        select
+            a.c_date,
+            sum(b.cnt_total) as cnt_total
+        from date_table as a
+                 left join
+             (select
+                  c_date,
+                  count(*) as cnt_total
+              from category
+              where c_date>=#{StartDate}
+                and c_date<=#{EndDate}
+                and c_category like '%'||#{keyword}||'%' group by c_date) as b
+             on a.c_date=b.c_date
+        where a.c_date>=#{StartDate}
+          and a.c_date<=#{EndDate}
+        group by a.c_date
+        order by a.c_date
+        ]]>
+	</select>
+
+    <!--전년도 일자별 키워드 수,평균 키워드분석-->
+    <select id="getKeyLastYear" resultType="bbs">
+	<![CDATA[
+        select
+            a.c_date,
+            sum(b.cnt_total) as cnt_total
+        from date_table as a
+                 left join
+             (select
+                  c_date,
+                  count(*) as cnt_total
+              from category
+              where c_date>=to_char(#{StartDate}::date - interval '1 year','yyyy-MM-dd')
+                and c_date<=to_char(#{EndDate}::date - interval '1 year','yyyy-MM-dd')
+                and c_category like '%'||#{keyword}||'%' group by c_date) as b
+             on a.c_date=b.c_date
+        where a.c_date>=to_char(#{StartDate}::date - interval '1 year','yyyy-MM-dd')
+          and a.c_date<=to_char(#{EndDate}::date - interval '1 year','yyyy-MM-dd')
+        group by a.c_date
+        order by a.c_date
+        ]]>
+	</select>
+
+    <!--올해 전체 키워드 평균-->
+    <select id="getThisYearAvg" resultType="bbs">
+	<![CDATA[
+        select
+            count(category)/count(distinct c_date) as avg_this
+        from category
+        where c_date>=#{StartDate}
+          and c_date<=#{EndDate}
+        ]]>
+	</select>
+
+    <!--전년도 전체 키워드 평균-->
+    <select id="getLastYearAvg" resultType="bbs">
+	<![CDATA[
+        select
+            count(category)/coalesce(nullif(count(distinct c_date),0),1) as avg_last
+        from category
+        where c_date>=to_char(#{StartDate}::date - interval '1 year','yyyy-MM-dd')
+          and c_date<=to_char(#{EndDate}::date - interval '1 year','yyyy-MM-dd')
+        ]]>
+	</select>
+
+</mapper>

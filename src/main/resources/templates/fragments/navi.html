@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lagn="ko" xmlns:th="http://www.thymeleaf.org">
+<th:block th:fragment="fragment-navi">
+    <div class="navbar navbar-expand-lg fixed-top navbar-dark bg-dark">
+        <div class="container">
+            <a href="/" class="navbar-brand">KeyWord Search View</a>
+            <div class="collapse navbar-collapse" id="navbarResponsive">
+                <ul class="navbar-nav">
+
+                    <li class="nav-item" th:classappend="${siteName}=='/' ? 'active not-active'">
+                        <a class="bi bi-binoculars nav-link" href="/">&nbsp;수집 데이터</a>
+                        <span class="visually-hidden">(current)</span>
+                    </li>
+                    <li class="nav-item" th:classappend="${siteName}=='/getBbsQna.do' ? 'active not-active'">
+                        <a class="bi bi-pie-chart nav-link" href="/getBbsQna.do">&nbsp;질문 유형 분석</a>
+                    </li>
+                    <li class="nav-item" th:classappend="${siteName}=='/getBbsKey.do' ? 'active not-active'">
+                        <a class="bi bi-bar-chart-line nav-link" href="/getBbsKey.do">&nbsp;키워드 분석</a>
+                </ul>
+
+            </div>
+        </div>
+    </div>
+</th:block>
+</html>

@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:replace="fragments/header :: fragment-header(pageTitle='키워드 분석 프로그램')"></th:block>
+</head>
+
+<body>
+    <!--nav-->
+    <th:block th:replace="fragments/navi :: fragment-navi(siteName='/')"></th:block>
+
+<!--수집현황 Total-->
+<div class="middle">
+<div class="container">
+    <h1>수집 현황</h1>
+    <table class="table table-hover">
+        <tr>
+            <th style="background:#026892; color: white; width: 10%;" >질문 등록일</th>
+            <th style="width: 5%; word-break:break-all;" th:each="count : ${bbsCount}"
+                th:text="${#calendars.format(count.date,'M/d(E)')}"></th>
+            <th></th>
+        </tr>
+        <tr>
+            <td style="background:#026892; color: white; width: 10%;">질문 건수</td>
+            <td th:each="count : ${bbsCount}" th:text="${count.cnt}"></td>
+            <th></th>
+        </tr>
+    </table>
+    <br>
+</div>
+
+<!-- 키워드 검색 -->
+<div class="container">
+    <form class="row" method="get" id="frm" name="frm" action="/getBbsList.do">
+        <div class="col-md-2">
+            <label for="start_date">조회시작일</label>
+            <input type="date" class="form-control" id="start_date" name="StartDate"
+                   th:value="${search.StartDate != null}? ${search.StartDate} : '2021-08-01'">
+        </div>
+        <div class="col-md-2">
+            <label for="end_date">조회종료일</label>
+            <input type="date" class="form-control" id="end_date" name="EndDate"
+            th:value="${search.EndDate != null} ? ${search.EndDate} : '2021-08-31'">
+        </div>
+        <div class="col-md-2">
+            <label for="search_item">조회조건</label>
+            <select class="form-select" name="searchCondition" id="search_item">
+                <option value="TITLE" th:selected="${search.searchCondition} == 'TITLE'" selected>질문제목</option>
+                <option value="KEYWORD" th:selected="${search.searchCondition} == 'KEYWORD'">키워드</option>
+                <option value="CONTENT" th:selected="${search.searchCondition} == 'CONTENT'">내용</option>
+            </select>
+        </div>
+
+        <div class="col-md-5">
+            <label for="searchKeyword">검색키워드</label>
+            <input type="text" id="searchKeyword" name="searchKeyword" class="form-control" placeholder="검색어를 입력해주세요">
+        </div>
+
+        <div class="col-md-auto">
+            <button type="submit" id="searchbbt" class="btn btn-primary" onclick="return DateCheck();">검색</button>
+        </div>
+    </form>
+    <!--총 건수 -->
+    <br>
+    <span th:text="'총'+${search.cnt_total}+'건 ('"/>
+    <span th:text="${search.cnt_total} == 0 ? '0' : ${search.page}"/>
+    <span th:text="'page /'+${search.endpage}+'page)'"/>
+
+    <!--질문 리스트 -->
+        <table class="table table-hover">
+            <thead>
+            <tr>
+            <th scope="col">No</th>
+            <th scope="col">질문 제목</th>
+            <th scope="col">키워드</th>
+            <th scope="col">등록일</th>
+            <th></th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:style="${search.cnt_total != 0 ? 'display:none;':''}">
+            <td colspan="4"> 검색 결과가 없습니다.</td>
+        </tr>
+        <tr th:id="'nmtitle' + ${index.index+1}"
+            th:each="bbs,index : ${bbsList}">
+            <td th:id="'number' + ${index.index+1}"
+                th:text="${bbs.number}"></td>
+            <td>
+                <a th:id="'l_title' + ${index.index+1}" data-bs-toggle="modal"
+                   th:href="@{'#detailList'+${index.index+1}}"
+                   th:text="${bbs.l_title}">
+                </a>
+            </td>
+            <td th:id="'category'+${index.index+1}"
+                th:text="${bbs.category}"></td>
+            <td th:id="'date'+${index.index+1}"
+                th:text="${#dates.format(bbs.date,'yyyy-MM-dd')}"></td>
+
+            <!-- Modal 적용(세부내용) -->
+            <td>
+                <div class="modal fade" th:id="'detailList'+${index.index+1}" role="dialog">
+                    <div class="modal-dialog modal-dialog-centered modal-lg">
+                        <!-- Modal content -->
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title bi bi-search">&nbsp;질문 세부내용</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true"></span>
+                                </button>
+                            </div>
+                            <!-- Modal Body -->
+                            <div class="modal-body">
+                                    <table class="schedule_table">
+                                        <tr>
+                                            <th class="s_table_title" style="width:100px;">질문 제목</th>
+                                            <th class="s_table_title" style="width:500px;"
+                                                th:id="'modal_title' + ${index.index+1}"
+                                                th:text="${bbs.l_title}"></th>
+                                        </tr>
+                                        <tr>
+                                            <td class="s_table_memo1">질문 내용</td>
+                                            <td class="s_table_memo2"
+                                                th:id="'modal_content' + ${index.index+1}"
+                                                th:text="${bbs.mainContent}">
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            <!-- Modal footer -->
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </td>
+            <!-- Modal 세부내용 끝 -->
+            </td>
+        </tr>
+        </tr>
+        </tbody>
+    </table>
+</div>
+        <!--페이징 처리-->
+        <nav aria-label="Page navigation example ">
+        <div class="pagination justify-content-center" th:style="${search.cnt_total == 0 ? 'display:none;':''}">
+            <ul class="pagination">
+                <!--처음 버튼 구현-->
+                <li th:classappend="${search.page} == '1' ? 'disabled'" class="page-item">
+                    <a class="page-link" th:href="@{'/getBbsList.do?page=1&StartDate='+${search.startDate}+
+                    '&EndDate='+${search.endDate}+
+                    '&searchKeyword='+${search.searchKeyword}+
+                    '&searchCondition='+${pageMaker.bbsVO.getSearchCondition()} }"
+                       aria-label="Previous">
+                    <span aria-hidden="true">처음</span>
+                    </a>
+                </li>
+                <!--이전 버튼 구현-->
+                <li th:class="${search.page} == '1' ? 'not-active'" class="page-item">
+                    <a class="page-link" th:href="@{'/getBbsList.do?page='+${search.page-10}+
+                    '&StartDate='+${search.startDate}+
+                    '&EndDate='+${search.endDate}+
+                    '&searchKeyword='+${search.searchKeyword}+
+                    '&searchCondition='+${search.searchCondition} }"
+                       aria-label="Previous">
+                        <span aria-hidden="true">이전</span>
+                    </a>
+                </li>
+                <!--Main 버튼 구현-->
+                <th:block  th:with="start = ${pageMaker.startPage}, end = ${pageMaker.endPage}">
+                    <li class="page-item"
+                        th:with="start = ${pageMaker.startPage}, end = ${pageMaker.endPage}"
+                        th:each="pageButton : ${#numbers.sequence(start, end)}"
+                        th:classappend="${pageButton} == ${search.page} ? 'active'">
+                        <a class="page-link" th:href="@{'/getBbsList.do?page={page}&StartDate='+${search.startDate}+
+                        '&EndDate='+${search.endDate}+
+                        '&searchKeyword='+${search.searchKeyword}+
+                        '&searchCondition='+${search.searchCondition} (page = ${pageButton})}"
+                           th:text=${pageButton}></a>
+                    </li>
+
+                </th:block>
+                <!--다음 버튼 구현-->
+                <li th:class="${search.page} == ${search.endpage} ? 'disabled'" class="page-item">
+                    <a class="page-link" th:href="@{'/getBbsList.do?page='+${search.page+10}+
+                    '&StartDate='+${search.startDate}+
+                    '&EndDate='+${search.endDate}+
+                    '&searchKeyword='+${search.searchKeyword}+
+                    '&searchCondition='+${search.searchCondition}}"
+                       aria-label="Next">
+                        <span aria-hidden="true">다음</span>
+                    </a>
+                </li>
+                <!--끝 버튼 구현-->
+                <li th:class="${search.page} == ${search.endpage} ? 'disabled'" class="page-item">
+                    <a class="page-link" th:href="@{'/getBbsList.do?page='+${search.endpage}+
+                    '&StartDate='+ ${search.startDate}+
+                    '&EndDate='+${search.endDate} +
+                    '&searchKeyword='+${search.searchKeyword}+
+                    '&searchCondition='+${search.searchCondition}}"
+                       aria-label="End">
+                        <span aria-hidden="true">끝</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+</div>
+
+<!-- jQuery (부트스트랩의 자바스크립트 플러그인을 위해 필요합니다) -->
+<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+<script type="text/javascript" src="/js/bootstrap.min.js"></script>
+
+</body>
+<th:block th:replace="fragments/footer :: fragment-footer"></th:block>
+</html>

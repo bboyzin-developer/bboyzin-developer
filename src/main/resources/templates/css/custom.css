@@ -1,0 +1,50 @@
+/*폰트 설정*/
+@font-face {
+    font-family: 'hanna';
+    src: url('../font/BMJUA_ttf.ttf') format('truetype');
+}
+/*폰트 지정*/
+body {
+    font-family: 'hanna';
+    padding-top: 70px;
+}
+
+.middle{
+    position: relative;
+}
+/*버튼 설정*/
+#searchbbt{
+    margin-top: 20px;
+    background:#026892;
+    color: white;
+}
+.schedule_table {
+    line-height: 2rem;
+}
+.s_table_title {
+    border-bottom: 1px solid #bfe2f3;
+}
+.modal-body{
+    background-color: #0f2537;
+}
+.modal-header{
+    background-color: #20374c;
+}
+.modal-footer{
+    background-color: #20374c;
+}
+/*footer 설정*/
+.footerbar{
+    height: 65px;
+    --bs-bg-opacity: 1;
+    background-color: rgba(var(--bs-dark-rgb), var(--bs-bg-opacity));
+    position: fixed;
+    width: 100%;
+    z-index: 777;
+    bottom: 0px;
+    box-shadow: -6px 0px 1px 1px #ebebeb;
+}
+
+.fixed-top {
+    box-shadow: -1px 1px 1px #ebebeb;
+}

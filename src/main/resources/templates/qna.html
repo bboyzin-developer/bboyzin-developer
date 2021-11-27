@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:replace="fragments/header :: fragment-header(pageTitle='질문 유형 분석')"></th:block>
+
+</head>
+
+<body>
+    <!--nav-->
+    <th:block th:replace="fragments/navi :: fragment-navi(siteName='getBbsQna.do')"></th:block>
+
+<!-- 키워드 검색 -->
+<div class="container">
+    <form class="row" method="get" id="frm" name="frm" action="/getBbsQna.do">
+        <div class="col-md-2">
+            <label for="start_date">조회시작일</label>
+            <input type="date" class="form-control" id="start_date" name="StartDate"
+                   th:value="${search.StartDate != null}? ${search.StartDate} : '2021-08-01'"
+                    min="2020-09-01" max="2021-08-31">
+        </div>
+        <div class="col-md-2">
+            <label for="end_date">조회종료일</label>
+            <input type="date" class="form-control" id="end_date" name="EndDate"
+                   th:value="${search.EndDate != null} ? ${search.EndDate} : '2021-08-31'"
+                   min="2020-09-01" max="2021-08-31">
+        </div>
+
+        <div class="col-md-auto">
+            <button type="submit" id="searchbbt" class="btn btn-primary">검색</button>
+            <input type="hidden" th:id="pieValue" th:value="${jsonArr}">
+        </div>
+    </form>
+
+    <!-- 그래프화면 -->
+    <br>
+    <h4>상위 키워드 그래프</h4>
+    <hr align="left" style="margin-top: 10px;">
+
+    <!--차트반영-->
+    <script src="https://code.highcharts.com/highcharts.js"></script>
+    <script src="https://code.highcharts.com/modules/exporting.js"></script>
+    <script src="https://code.highcharts.com/modules/export-data.js"></script>
+    <script src="https://code.highcharts.com/modules/accessibility.js"></script>
+
+    <figure class="highcharts-figure">
+        <div id="container" style="height: 400px; text-align:center;">
+            <p style="padding: 150px 40%;"
+               th:text="${search.StartDate==null ? '==데이터가 존재하지 않습니다!==' :''}">
+            </p>
+        </div>
+    </figure>
+    <!--차트적용 끝-->
+
+    <!--차트데이터 호출-->
+    <script type="text/javascript" src="js/chart.js"></script>
+
+
+    <!--테이블 구현-->
+        <details>
+        <summary>세부 리스트 펼쳐보기</summary>
+            <h4>상위 키워드 테이블</h4>
+        <hr align="left" style="margin-top: 10px;">
+        <table class="table table-hover"
+               th:classappend="${search.startDate==null}? 'hide'">
+            <thead>
+            <tr>
+                <th style="width: 10%; text-align: center; background:#026892; color: white;">No</th>
+                <th style="width: 30%; text-align: center; background:#026892; color: white;">키워드</th>
+                <th style="width: 30%; text-align: center; background:#026892; color: white;">합계 (건)</th>
+                <th style="width: 30%; text-align: center; background:#026892; color: white;">비중 (%)</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:id="'nmtitle'+${index.index+1}"
+                th:each="hList,index : ${bbsQna}" style="width: 10%; text-align: center;">
+                <td th:text="${index.index+1}" style="width: 10%; text-align: center;"></td>
+                <td th:text="${hList.c_category}" style="width: 10%; text-align: center;"></td>
+                <td th:text="${#numbers.formatInteger(hList.cnt_total, 0, 'COMMA')}" style="width: 10%; text-align: center;"></td>
+                <td th:text="${hList.round_category}" style="width: 10%; text-align: center;"></td>
+            </tr>
+            </tbody>
+        </table>
+    </details>
+</div>
+</body>
+<th:block th:replace="fragments/footer :: fragment-footer"></th:block>
+</html>

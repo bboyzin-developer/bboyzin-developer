@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:replace="fragments/header :: fragment-header(pageTitle='키워드 분석 프로그램')"></th:block>
+</head>
+
+<body>
+    <!--navi-->
+    <th:block th:replace="fragments/navi :: fragment-navi(siteName='/')"></th:block>
+
+
+<!--수집현황 Total-->
+      <div class="container">
+    <h1>수집 현황</h1>
+    <table class="table table-hover">
+        <thead>
+          <tr>
+              <th style="background:#026892; color: white; width: 10%;" >질문 등록일</th>
+
+            
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="table-active">
+              <td style="background:#026892; color: white; width: 10%;">질문 건수</th>
+              <th></th>
+            
+          </tr>
+        </table>
+        <br>
+    </div>
+
+    <!-- 키워드 검색 -->
+    <div class="container">
+    <form class="row" method="get" id="frm" name="frm" action="/getBbsList.do">
+        <div class="col-md-2">
+            <label for="start_date">조회시작일</label>
+            <input type="date" class="form-control" id="start_date" name="StartDate" value="2021-08-01">
+        </div>
+        <div class="col-md-2">
+            <label for="end_date">조회종료일</label>
+            <input type="date" class="form-control" id="end_date" name="EndDate" value="2021-08-31">
+        </div>
+        <div class="col-md-2">
+            <label for="search_item">조회조건</label>
+            <select class="form-select" name="searchCondition" id="search_item">
+                <option value="TITLE" selected>질문제목</option>
+                <option value="KEYWORD">키워드</option>
+                <option value="CONTENT">내용</option>
+            </select>
+        </div>
+        <div class="col-md-5">
+            <label for="searchKeyword">검색키워드</label>
+            <input type="text" id="searchKeyword" name="searchKeyword" class="form-control" placeholder="검색어를 입력해주세요">
+        </div>
+
+        <div class="col-md-auto">
+            <button type="submit" id="searchbbt" class="btn btn-primary" onclick="return DateCheck();">검색</button>
+        </div>
+    </form>
+
+        <!--총 건수 -->
+        <br>
+        <div> 총 0 건 ( page /  page) </div>
+
+    <table class="table table-hover">
+        <thead>
+          <tr>
+            <th scope="col">No</th>
+            <th scope="col">질문 제목</th>
+            <th scope="col">키워드</th>
+            <th scope="col">등록일</th>
+          </tr>
+        </thead>
+        <tbody>
+
+        </tbody>
+      </table>
+    </div>
+</body>
+    <th:block th:replace="fragments/footer :: fragment-footer"></th:block>
+</html>
